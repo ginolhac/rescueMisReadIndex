@@ -8,7 +8,10 @@ Compilation using kseq.h written by Heng Li and zlib.h:
 gcc -o rescueMisReadIndex rescueMisReadIndex.c -lz
 
 or simply type:
+<<<<<<< HEAD
 
+=======
+>>>>>>> e72f97bf5a63d67acc631c98cb9192dfe392c433
 	make
 
 Inputs:
