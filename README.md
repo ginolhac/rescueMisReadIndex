@@ -4,7 +4,12 @@ rescueMisreadIndex
 Small C program that from gzipped / non compressed paired-end/single-end fastq files basecalled with at least the Illumina 1.8+ pipeline, look for indexed reads where bases were misread.
 
 Compilation using kseq.h written by Heng Li and zlib.h:
+
 gcc -o rescueMisReadIndex rescueMisReadIndex.c -lz
+
+or simply type:
+
+	make
 
 Inputs:
 ------
