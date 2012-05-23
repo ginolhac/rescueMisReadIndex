@@ -143,9 +143,12 @@ void help ( char *prog_name ) {
 		fprintf(stderr, "Missing a required argument! (%d < 4)\n", req_args);
 		help(argv[0]);
 	}
-	
 	fp = gzopen(fin1, "r"); // open the file handler  
-	seq = kseq_init(fp); //  initialize seq  	
+	seq = kseq_init(fp); //  initialize seq  
+ 	if( seq == NULL) {
+		fprintf(stderr, "Cannot open file %s \n", fin1);
+		exit(1);
+	}	
 	char *fout1 = (char *) calloc(201, sizeof(char)); // for output names
 	char *fstat = (char *) calloc(201, sizeof(char));
 	char *fout2 = (char *) calloc(201, sizeof(char));
@@ -154,6 +157,10 @@ void help ( char *prog_name ) {
 	if( paired) {
 		fp2 = gzopen(fin2, "r"); 
 		seq2 = kseq_init(fp2); 
+ 		if( seq2 == NULL) {
+			fprintf(stderr, "Cannot open file %s \n", fin2);
+			exit(1);
+		}
 	}
 	
 	if( append ) {
@@ -207,10 +214,16 @@ void help ( char *prog_name ) {
 	}
 	else{
 		w1 = gzopen(fout1, "w"); //  open the file handlers to write
-		w2 = gzopen(fout2, "w");
  		if( w1 == NULL) {
 			fprintf(stderr, "Cannot write file %s \n", fout1);
 			exit(1);
+		}
+		if( paired ) {
+			w2 = gzopen(fout2, "w");
+		 	if( w2 == NULL) {
+				fprintf(stderr, "Cannot write file %s \n", fout2);
+				exit(1);
+			}	
 		}
 	} 
 	stat = fopen(fstat, "wb");  
