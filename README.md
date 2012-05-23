@@ -5,7 +5,7 @@ Small C program that from gzipped / non compressed paired-end/single-end fastq f
 
 Compilation using kseq.h written by Heng Li and zlib.h:
 
-gcc -o rescueMisReadIndex rescueMisReadIndex.c -lz
+	gcc Wall -g -O2 -o rescueMisReadIndex rescueMisReadIndex.c -lz
 
 or simply type:
 	
