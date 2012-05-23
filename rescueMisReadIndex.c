@@ -7,7 +7,7 @@
 /*
 Aurelien Ginolhac 120125
 From gzipped/non gzipped paired fastq files from Illumina 1.8+
-look for indexed reads where index was misread
+look for indexed reads were the index was misread
 
 compile with  gcc -o rescueMisReadIndex rescueMisReadIndex.c -lz
 Heng Li's kseq.h must be present in the same folder as c code.
@@ -57,9 +57,10 @@ void help ( char *prog_name ) {
 }
 
   int main(int argc, char *argv[])  {  
-	gzFile fp, fp2, w1, w2, stat;  
+	gzFile fp, fp2, w1, w2, stat, m;
 	kseq_t *seq, *seq2;  
-	int i, l , m, opt; 
+	w1 = w2 = m = seq2 = NULL;  
+	int l, opt; 
 	int cpt = 0;
 	int good = 0;
 	int bad = 0;
@@ -77,7 +78,7 @@ void help ( char *prog_name ) {
 	bool dry = false;
 	bool append = false;
 	  
-	char delims[] = ":"; // for splittting the index field such as 1:N:0:ACAGTG
+	char delims[] = ":"; // for splitting the index field such as 1:N:0:ACAGTG
 	if ((argc == 1)) {  
 		help(argv[0]);
 	}  
@@ -218,7 +219,7 @@ void help ( char *prog_name ) {
                 return 1;
 	}	
 	// single-end mode
-	if( paired) {
+	if( paired ) {
 		printf("Paired-end mode\n");
 	}
 	else {
@@ -228,8 +229,8 @@ void help ( char *prog_name ) {
 	
 	while ((l = kseq_read(seq)) >= 0 ) { // STEP 4: read sequence  from pairs in parallel
 		
-		if( paired) {
-			m = kseq_read(seq2) ;
+		if( paired ) {
+			kseq_read(seq2) ;
 		}
 		
 		//printf("name: %s\n", seq->name.s);  
@@ -289,7 +290,7 @@ void help ( char *prog_name ) {
 			flag++;
 		}
 		
-		if( paired) {
+		if( paired ) {
 			// check if pair is ok ie, same index read in both paired files
 			if( strcmp ( idx1, idx2) == 0 ){ flag++; }
 			else { bad++;}
