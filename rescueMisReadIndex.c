@@ -52,6 +52,7 @@ void help ( char *prog_name ) {
 	fprintf(stderr, "Optional:\n" );
 	fprintf(stderr, "\t-2 <second read input fastq filename> (gziped or not)\n" );
 	fprintf(stderr, "\t-t do not ouput result files, only stats files\n" );
+	fprintf(stderr, "\t-q quiet, do not print progression info\n" );
 	fprintf(stderr, "\t-p prefix to be added to output files, MUST end by a '/'\n\n" );
 	exit (2);  
 }
@@ -59,7 +60,7 @@ void help ( char *prog_name ) {
   int main(int argc, char *argv[])  {  
 	gzFile fp, fp2, w1, w2, stat, m;
 	kseq_t *seq, *seq2;  
-	w1 = w2 = m = seq2 = NULL;  
+	w1 = w2 = m = seq2 = fp2 = NULL;  
 	int l, opt; 
 	int cpt = 0;
 	int good = 0;
@@ -77,6 +78,7 @@ void help ( char *prog_name ) {
 	bool paired = false;
 	bool dry = false;
 	bool append = false;
+	bool quiet = false;
 	  
 	char delims[] = ":"; // for splitting the index field such as 1:N:0:ACAGTG
 	if ((argc == 1)) {  
@@ -84,7 +86,7 @@ void help ( char *prog_name ) {
 	}  
 
 	// example taken from https://github.com/jstjohn/SeqPrep/blob/master/SeqPrep.c
-	while( (opt=getopt( argc, argv, "1:2:i:m:n:p:th" )) != -1 ) {
+	while( (opt=getopt( argc, argv, "1:2:i:m:n:p:tqh" )) != -1 ) {
 		switch( opt ) {
 	
 		//REQUIRED ARGUMENTS
@@ -131,6 +133,10 @@ void help ( char *prog_name ) {
 		dry=true;
 		break;
 		
+		case 'q' :
+		quiet=true;
+		break;
+		
 		case 'h' :
 		help(argv[0]);
 		break;
@@ -150,7 +156,7 @@ void help ( char *prog_name ) {
 		exit(1);
 	}	
 	char *fout1 = (char *) calloc(201, sizeof(char)); // for output names
-	char *fstat = (char *) calloc(201, sizeof(char));
+	char *fstat  = (char *) calloc(201, sizeof(char));
 	char *fout2 = (char *) calloc(201, sizeof(char));
 	
 	// single-end mode
@@ -323,7 +329,7 @@ void help ( char *prog_name ) {
 				}
 			}
 		}
-		if(cpt % 2000000 == 0 ) {fprintf(stderr, "%8d reads processed, %8d rescued so far\n", cpt, good); }
+		if((cpt % 2000000 == 0 ) && (!quiet)) {fprintf(stderr, "%8d reads processed, %8d rescued so far\n", cpt, good); }
 	}  
 	printf("%d seq read, %d rescued\n", cpt, good);  
 	if(paired) {
