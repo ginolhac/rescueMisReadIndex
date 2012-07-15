@@ -27,7 +27,7 @@ Inputs:
 
 	    -2 <second read input fastq filename> (gziped or not)
 	    -t do not ouput result files, only stats files to see how much you could recover with a set of options
-	    -p prefix, useful is you don't have rights to write in the folder where the inputs files are. MUST finish by a slash
+	    -p prefix, useful is you don't have rights to write in the folder where the inputs files are. A slash will added if not supplied
 
 An example of effective run with an output prefix:
 
@@ -46,4 +46,29 @@ compressed fastq files of reads in sync. Filenames are appended with the chosen 
 stats file which sum up:
 
     read1.fq.gz_0_1_ACAGTG.stats
+
+Appendix:
+--------
+
+You may used the following AWK line to sum up the statistics:
+
+	awk '{if($1~/^read/){sumRead+=$2};if($1~/^rescued/){sumGood+=$2}} END {print "tot read\t"sumRead"\ntot rescued\t"sumGood"\npcent\t"sumGood/sumRead*100}' *0_2_*stats
+
+You can also the kind of bash script to loop on the different 4-million-read paired-end files:
+
+	#!/bin/bash
+	RUN=/basecalls/hiseq/Undetermined_indices/
+	OUT=/data/
+	INDEX=ATCACG
+	cd $RUN
+	for folder in Sample_lane? ; do
+	      cd $folder 
+	      for file in *_R1*gz ; do 
+	              # first rescue with 2N 
+	              rescueMisReadIndex1.1 -1 $file -2 ${file/_R1_/_R2_} -i $INDEX -m 0 -n 2 -p $OUT/$folder/
+	              # then dry run with 1 N
+	              rescueMisReadIndex1.1 -1 $file -2 ${file/_R1_/_R2_} -i $INDEX -m 0 -n 1 -t -p $OUT/$folder/
+	      done
+	      cd ..
+	done
 

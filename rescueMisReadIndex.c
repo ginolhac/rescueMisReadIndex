@@ -1,6 +1,6 @@
 #include <zlib.h>  
 #include <stdio.h>  
-#include<string.h>
+#include <string.h>
 #include <stdbool.h>
 #include "kseq.h"  
 
@@ -53,7 +53,7 @@ void help ( char *prog_name ) {
 	fprintf(stderr, "\t-2 <second read input fastq filename> (gziped or not)\n" );
 	fprintf(stderr, "\t-t do not ouput result files, only stats files\n" );
 	fprintf(stderr, "\t-q quiet, do not print progression info\n" );
-	fprintf(stderr, "\t-p prefix to be added to output files, MUST end by a '/'\n\n" );
+	fprintf(stderr, "\t-p prefix to be added to output files, a '/' will be added if not supplied\n\n" );
 	exit (2);  
 }
 
@@ -61,16 +61,17 @@ void help ( char *prog_name ) {
 	gzFile fp, fp2, w1, w2, stat, m;
 	kseq_t *seq, *seq2;  
 	w1 = w2 = m = seq2 = fp2 = NULL;  
-	int l, opt; 
+	int l, opt, i; 
 	int cpt = 0;
 	int good = 0;
 	int bad = 0;
 	int lg = 0;
 	int req_args = 0;
-	char *fin1 = (char *) calloc(201, sizeof(char)); // for output names
+	char *fin1 = (char *) calloc(201, sizeof(char)); // for input names
 	char *fin2 = (char *) calloc(201, sizeof(char));
 	char *index = (char *) calloc(10, sizeof(char));
 	char *prefix = (char *) calloc(201, sizeof(char));
+	char *res = (char *) calloc(201, sizeof(char));
 	char *mism_allowed = (char *) calloc(10, sizeof(char));
 	char *n_allowed = (char *) calloc(10, sizeof(char));
 	int mism_threshold = 0;
@@ -159,7 +160,7 @@ void help ( char *prog_name ) {
 	char *fstat  = (char *) calloc(201, sizeof(char));
 	char *fout2 = (char *) calloc(201, sizeof(char));
 	
-	// single-end mode
+	// paired-end mode
 	if( paired) {
 		fp2 = gzopen(fin2, "r"); 
 		seq2 = kseq_init(fp2); 
@@ -169,52 +170,41 @@ void help ( char *prog_name ) {
 		}
 	}
 	
+	sprintf(res, "%s", fin1);
+	
+	// to  remove the extension .gz
+	res = strstr(fin1, ".gz");
+
+	for (i=0;i<(strlen(fin1)-strlen(res));i++){
+		res[i]=fin1[i];
+	}
+	res[i+1]='\0';
+	
 	if( append ) {
-		strcpy(fout1, prefix);
-		strcat(fout1 , fin1);
-		strcpy(fstat, prefix);
-		strcat(fstat , fin1);
-		// single-end mode
-		if( paired) {
-			strcpy(fout2, prefix);
-			strcat(fout2 , fin2);
+
+		// must test if append name ends by a '/'
+		if( prefix[strlen(prefix)-1] != '/'){
+			prefix[strlen(prefix)]='/';
+			prefix[strlen(prefix)+1]='\0';
 		}
-		fprintf(stderr, "Add prefix %s to outfiles\n", prefix);
+		sprintf(fout1, "%s%s_%s_%s_%s.gz", prefix, res, mism_allowed, n_allowed, index);
+		sprintf(fstat, "%s%s_%s_%s_%s.stats", prefix, res, mism_allowed, n_allowed, index);
+		// paired-end mode
+		if( paired) {
+			sprintf(fout2, "%s%s_%s_%s_%s.gz", prefix, res, mism_allowed, n_allowed, index);
+		}
+		if(!quiet){
+			printf("Add prefix %s to outfiles\n", prefix);
+		}
 	}
 	else {
-		strcpy(fout1, fin1);
-		// single-end mode
+		sprintf(fout1, "%s_%s_%s_%s.gz", res, mism_allowed, n_allowed, index);
+		sprintf(fstat, "%s_%s_%s_%s.stats", res, mism_allowed, n_allowed, index);
 		if( paired) {
-			strcpy(fout2, fin2);
+			sprintf(fout2, "%s_%s_%s_%s.gz", res, mism_allowed, n_allowed, index);
 		}
-		strcpy(fstat, fin1);
 	}
-	strcat(fout1 , "_");	
-	strcat(fout1 , mism_allowed);	
-	strcat(fout1 , "_");	
-	strcat(fout1 , n_allowed);
-	strcat(fout1 , "_");
-	strcat(fout1 , index);
-	strcat(fout1 , ".out.gz");
-	strcat(fstat , "_");
-	strcat(fstat , mism_allowed);
-	strcat(fstat , "_");
-	strcat(fstat , n_allowed);
-	strcat(fstat , "_");
-	strcat(fstat , index);
-	strcat(fstat , ".stats");
-	
-	// single-end mode
-	if( paired) {
-		strcat(fout2 , "_");
-		strcat(fout2 , mism_allowed);	
-		strcat(fout2 , "_");		
-		strcat(fout2 , n_allowed);
-		strcat(fout2 , "_");
-		strcat(fout2 , index);
-		strcat(fout2 , ".out.gz");
-	}
-	
+	// dry mode, not output files except stats
 	if(dry) {
 		printf("dry run only, writing only stats file %s\n", fstat);
 	}
@@ -237,15 +227,16 @@ void help ( char *prog_name ) {
 		fprintf(stderr, "Cannot write file %s \n", fstat);
                 return 1;
 	}	
-	// single-end mode
-	if( paired ) {
-		printf("Paired-end mode\n");
-	}
-	else {
-		printf("Single-end mode\n");
-	}
-	printf("Looking for index %s in %s, #mismatch allowed %s, #Ns allowed %s\n", index, fin1, mism_allowed, n_allowed );
-	
+	if(!quiet){
+		if( paired ) {
+			printf("Paired-end mode\n");
+		}
+		else {
+			printf("Single-end mode\n");
+		}
+		printf("Looking for index %s in %s, #mismatch allowed %s, #Ns allowed %s\n", index, fin1, mism_allowed, n_allowed );
+		printf("Writing to %s\n", fout1);
+	}	
 	while ((l = kseq_read(seq)) >= 0 ) { // STEP 4: read sequence  from pairs in parallel
 		
 		if( paired ) {
@@ -331,7 +322,9 @@ void help ( char *prog_name ) {
 		}
 		if((cpt % 2000000 == 0 ) && (!quiet)) {fprintf(stderr, "%8d reads processed, %8d rescued so far\n", cpt, good); }
 	}  
-	printf("%d seq read, %d rescued\n", cpt, good);  
+	if(!quiet){
+		printf("%d seq read, %d rescued\n", cpt, good);  
+	}
 	if(paired) {
 		fprintf(stat,"Paired-end\nVersion %s\nfiles\t%s\t%s\nindex\t%s\n#mismatches\t%s\n#Ns\t%s\nread\t%d\nrescued\t%d\nunpaired\t%d\n", VERSION, fin1, fin2,index, mism_allowed, n_allowed, cpt, good, bad);
 	}
@@ -341,10 +334,10 @@ void help ( char *prog_name ) {
 	kseq_destroy(seq); // STEP 5: destroy seq  
 	kseq_destroy(seq2);
 	gzclose(fp); // STEP 6: close the file handlers
-	if(!dry) {	gzclose(w1); }
+	if(!dry) {gzclose(w1);}
 	if(paired) {
 		gzclose(fp2);
-		if(!dry) {	gzclose(w2); }   
+		if(!dry) {gzclose(w2);}   
 	}
 	fclose(stat);
 	return 0;  
