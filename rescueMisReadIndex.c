@@ -326,7 +326,7 @@ void help ( char *prog_name ) {
 		printf("%d seq read, %d rescued\n", cpt, good);  
 	}
 	if(paired) {
-		fprintf(stat,"Paired-end\nVersion %s\nfiles\t%s\t%s\nindex\t%s\n#mismatches\t%s\n#Ns\t%s\nread\t%d\nrescued\t%d\nunpaired\t%d\n", VERSION, fin1, fin2,index, mism_allowed, n_allowed, cpt, good, bad);
+		fprintf(stat,"Paired-end\nVersion %s\nfiles\t%s\t%s\nindex\t%s\n#mismatches\t%s\n#Ns\t%s\npaired read\t%d\npaired rescued\t%d\nunpaired\t%d\n", VERSION, fin1, fin2,index, mism_allowed, n_allowed, cpt, good, bad);
 	}
 	else {
 		fprintf(stat,"Single-end\nVersion %s\nfile\t%s\nindex\t%s\n#mismatches\t%s\n#Ns\t%s\nread\t%d\nrescued\t%d\n", VERSION, fin1, index, mism_allowed, n_allowed, cpt, good);
