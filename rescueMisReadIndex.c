@@ -72,6 +72,7 @@ void help ( char *prog_name ) {
 	char *index = (char *) calloc(10, sizeof(char));
 	char *prefix = (char *) calloc(201, sizeof(char));
 	char *res = (char *) calloc(201, sizeof(char));
+	char *res2= (char *) calloc(201, sizeof(char));
 	char *mism_allowed = (char *) calloc(10, sizeof(char));
 	char *n_allowed = (char *) calloc(10, sizeof(char));
 	int mism_threshold = 0;
@@ -168,6 +169,7 @@ void help ( char *prog_name ) {
 			fprintf(stderr, "Cannot open file %s \n", fin2);
 			exit(1);
 		}
+		sprintf(res2, "%s", fin2);
 	}
 	
 	sprintf(res, "%s", fin1);
@@ -179,6 +181,13 @@ void help ( char *prog_name ) {
 		res[i]=fin1[i];
 	}
 	res[i+1]='\0';
+	if( paired) {
+		res2 = strstr(fin2, ".gz");
+		for (i=0;i<(strlen(fin2)-strlen(res2));i++){
+			res2[i]=fin2[i];
+		}
+		res2[i+1]='\0';
+	}
 	
 	if( append ) {
 
@@ -191,7 +200,7 @@ void help ( char *prog_name ) {
 		sprintf(fstat, "%s%s_%s_%s_%s.stats", prefix, res, mism_allowed, n_allowed, index);
 		// paired-end mode
 		if( paired) {
-			sprintf(fout2, "%s%s_%s_%s_%s.gz", prefix, res, mism_allowed, n_allowed, index);
+			sprintf(fout2, "%s%s_%s_%s_%s.gz", prefix, res2, mism_allowed, n_allowed, index);
 		}
 		if(!quiet){
 			printf("Add prefix %s to outfiles\n", prefix);
@@ -201,7 +210,7 @@ void help ( char *prog_name ) {
 		sprintf(fout1, "%s_%s_%s_%s.gz", res, mism_allowed, n_allowed, index);
 		sprintf(fstat, "%s_%s_%s_%s.stats", res, mism_allowed, n_allowed, index);
 		if( paired) {
-			sprintf(fout2, "%s_%s_%s_%s.gz", res, mism_allowed, n_allowed, index);
+			sprintf(fout2, "%s_%s_%s_%s.gz", res2, mism_allowed, n_allowed, index);
 		}
 	}
 	// dry mode, not output files except stats
