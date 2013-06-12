@@ -158,9 +158,10 @@ void help ( char *prog_name ) {
 		exit(1);
 	}	
 	char *fout1 = (char *) calloc(201, sizeof(char)); // for output names
-	char *fstat  = (char *) calloc(201, sizeof(char));
+	char *fstat = (char *) calloc(201, sizeof(char));
 	char *fout2 = (char *) calloc(201, sizeof(char));
-	
+	fprintf(stderr, "open file %s \n", fin1);
+	fprintf(stderr, "open file %s \n", fin2);
 	// paired-end mode
 	if( paired) {
 		fp2 = gzopen(fin2, "r"); 
@@ -169,21 +170,15 @@ void help ( char *prog_name ) {
 			fprintf(stderr, "Cannot open file %s \n", fin2);
 			exit(1);
 		}
-		sprintf(res2, "%s", fin2);
 	}
-	
-	sprintf(res, "%s", fin1);
-	
 	// to  remove the extension .gz
-	res = strstr(fin1, ".gz");
-
-	for (i=0;i<(strlen(fin1)-strlen(res));i++){
+	for (i=0;i<(strlen(fin1)-3);i++){
 		res[i]=fin1[i];
 	}
 	res[i+1]='\0';
 	if( paired) {
-		res2 = strstr(fin2, ".gz");
-		for (i=0;i<(strlen(fin2)-strlen(res2));i++){
+		// assume R1 and R2 filenames have identical lengths
+		for (i=0;i<(strlen(fin1)-3);i++){
 			res2[i]=fin2[i];
 		}
 		res2[i+1]='\0';
