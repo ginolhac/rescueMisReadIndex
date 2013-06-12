@@ -40,12 +40,12 @@ Outputs:
 
 compressed fastq files of reads in sync. Filenames are appended with the chosen parameters:
 
-    read1.fq.gz_0_1_ACAGTG.out.gz
-    read2.fq.gz_0_1_ACAGTG.out.gz
+    read1.fq_0_1_ACAGTG.gz
+    read2.fq_0_1_ACAGTG.gz
 
-stats file which sum up:
+a stat file contains a summary:
 
-    read1.fq.gz_0_1_ACAGTG.stats
+    read1.fq_0_1_ACAGTG.stats
 
 Appendix:
 --------
